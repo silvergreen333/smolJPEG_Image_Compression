@@ -100,7 +100,7 @@ class CompressionWorker(QThread):
             f"Mode: {'Quality' if self.mode == 'quality' else 'Performance'}."
         )
         self.activity_changed.emit("Ready")
-        self.eta_changed.emit("Time left: estimatingâ€¦")
+        self.eta_changed.emit("Time left: estimating...")
         self.image_progress.emit(0)
 
         for index, source_path in enumerate(files, start=1):
@@ -115,7 +115,7 @@ class CompressionWorker(QThread):
             self.file_started.emit(file_name)
             self.progress.emit(index - 1, total)
             self.image_progress.emit(0)
-            self.activity_changed.emit(f"{file_name} â€” Getting image ready")
+            self.activity_changed.emit(f"{file_name} - Getting image ready")
             self.row_activity_changed.emit(file_name, "Getting image ready")
             self.eta_changed.emit(self._compose_eta_label(None))
             self.log.emit(f"Starting {file_name}")
@@ -130,7 +130,7 @@ class CompressionWorker(QThread):
                 stage = self._stage_from_message(file_name, message)
                 if stage:
                     self._current_activity = stage
-                    self.activity_changed.emit(f"{file_name} â€” {stage}")
+                    self.activity_changed.emit(f"{file_name} - {stage}")
                     self.row_activity_changed.emit(
                         file_name,
                         self._compose_row_activity(stage, self._latest_current_eta),
@@ -183,7 +183,7 @@ class CompressionWorker(QThread):
                     "Original kept",
                     "No compression needed",
                 )
-                self.activity_changed.emit(f"{file_name} â€” Skipped")
+                self.activity_changed.emit(f"{file_name} - Skipped")
                 self.log.emit(f"Skipped {file_name}: already under size limit")
 
                 self._durations.append(time.monotonic() - file_start_ts)
@@ -225,7 +225,7 @@ class CompressionWorker(QThread):
                     quality_text,
                     details_text,
                 )
-                self.activity_changed.emit(f"{file_name} â€” Done")
+                self.activity_changed.emit(f"{file_name} - Done")
                 self.log.emit(f"Finished {file_name} in {elapsed_text}")
 
             except OperationCancelled:
@@ -239,7 +239,7 @@ class CompressionWorker(QThread):
                     "-",
                     "Stopped by user",
                 )
-                self.activity_changed.emit(f"{file_name} â€” Cancelled")
+                self.activity_changed.emit(f"{file_name} - Cancelled")
                 self.log.emit(f"Cancelled {file_name}")
                 break
 
@@ -257,7 +257,7 @@ class CompressionWorker(QThread):
                 )
                 self.log.emit(f"Could not process {file_name}")
                 self.log.emit(f"{file_name} error: {exc}")
-                self.activity_changed.emit(f"{file_name} â€” Failed")
+                self.activity_changed.emit(f"{file_name} - Failed")
 
             self._durations.append(time.monotonic() - file_start_ts)
             self.progress.emit(index, total)
@@ -275,7 +275,7 @@ class CompressionWorker(QThread):
     def _compose_row_activity(self, activity: str, current_eta: float | None) -> str:
         if current_eta is None:
             return activity
-        return f"{activity} Â· about {_format_duration(current_eta)} left"
+        return f"{activity} - about {_format_duration(current_eta)} left"
 
     def _compose_eta_label(self, current_image_eta: float | None) -> str:
         parts: list[str] = []
@@ -283,7 +283,7 @@ class CompressionWorker(QThread):
         if current_image_eta is not None:
             parts.append(f"This image: about {_format_duration(current_image_eta)}")
         else:
-            parts.append("This image: estimatingâ€¦")
+            parts.append("This image: estimating...")
 
         remaining_after_current = max(0, self._total_files - self._current_index)
 
