@@ -3,9 +3,13 @@
 smolJPEG is a standalone Windows 11 desktop app for batch JPEG compression by target file size.
 You set a max size in MB, and the app finds the best result under that limit while keeping the original image resolution.
 
+<p align="center">
+  <img src="app.png" alt="smolJPEG app screenshot" width="850">
+</p>
+
 ## What This App Is
 
-- A Windows 11 image compression app.
+- Windows 11 image compression app.
 - Same resolution, smaller file size.
 - Runs locally (no cloud upload).
 - Result: `3840x2160 image (30 MB) --> 3840x2160 image (8 MB)`
