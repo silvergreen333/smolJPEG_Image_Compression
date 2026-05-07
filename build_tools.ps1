@@ -1,7 +1,8 @@
 param(
     [ValidateSet("Release", "RelWithDebInfo", "Debug")]
     [string]$Configuration = "Release",
-    [switch]$SkipBuild
+    [switch]$SkipBuild,
+    [switch]$AllowPrebuiltFallback
 )
 
 $ErrorActionPreference = "Stop"
@@ -18,6 +19,13 @@ function Ensure-Directory([string]$path) {
     if (-not (Test-Path -LiteralPath $path)) {
         New-Item -ItemType Directory -Path $path -Force | Out-Null
     }
+}
+
+function Reset-Directory([string]$path) {
+    if (Test-Path -LiteralPath $path) {
+        Remove-Item -LiteralPath $path -Recurse -Force
+    }
+    New-Item -ItemType Directory -Path $path -Force | Out-Null
 }
 
 function Invoke-ExternalCommand(
@@ -160,13 +168,20 @@ function Stage-Tool(
 
     if ($null -eq $selected) {
         Write-Warning "No $exeName found for $toolName. Search roots:`n  $($searchRoots -join "`n  ")"
-        return $false
+        return $null
     }
 
     $dest = Join-Path $destinationDir $exeName
     Copy-Item -LiteralPath $selected.FullName -Destination $dest -Force
     Write-Host "$toolName staged: $($selected.FullName) -> $dest"
-    return $true
+    return [PSCustomObject]@{
+        toolName = $toolName
+        exeName = $exeName
+        sourcePath = $selected.FullName
+        destinationPath = $dest
+        sourceLastWriteTimeUtc = $selected.LastWriteTimeUtc.ToString("o")
+        sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $dest).Hash
+    }
 }
 
 $jpegliSource = Join-Path $toolsRoot "jpegli\jpegli-main"
@@ -186,33 +201,60 @@ Try-Build-WithCMake `
 Try-Build-Butteraugli -sourceDir $butterSource
 
 Write-Step "Staging runtime tools"
-$jpegliOk = Stage-Tool `
+$strictSourceOnly = -not $AllowPrebuiltFallback
+if ($strictSourceOnly) {
+    Write-Host "Mode: strict source build only (no prebuilt fallback)." -ForegroundColor Yellow
+}
+else {
+    Write-Warning "Mode: prebuilt fallback enabled."
+}
+
+Reset-Directory -path $runtimeRoot
+
+$jpegliRoots = @($jpegliBuild)
+$mozjpegRoots = @($mozjpegBuild)
+$butterRoots = @((Join-Path $butterSource "bazel-bin"))
+
+if ($AllowPrebuiltFallback) {
+    $jpegliRoots += @($jpegliSource, (Join-Path $toolsRoot "jpegli"))
+    $mozjpegRoots += @($mozjpegSource, (Join-Path $toolsRoot "mozjpeg"))
+    $butterRoots += @($butterSource, (Join-Path $toolsRoot "butteraugli"))
+}
+
+$jpegliResult = Stage-Tool `
     -toolName "jpegli" `
     -exeName "cjpegli.exe" `
-    -searchRoots @($jpegliBuild, $jpegliSource, (Join-Path $toolsRoot "jpegli")) `
+    -searchRoots $jpegliRoots `
     -destinationDir (Join-Path $runtimeRoot "jpegli")
 
-$mozjpegOk = Stage-Tool `
+$mozjpegResult = Stage-Tool `
     -toolName "mozjpeg" `
     -exeName "cjpeg.exe" `
-    -searchRoots @($mozjpegBuild, $mozjpegSource, (Join-Path $toolsRoot "mozjpeg")) `
+    -searchRoots $mozjpegRoots `
     -destinationDir (Join-Path $runtimeRoot "mozjpeg")
 
-$butterOk = Stage-Tool `
+$butterResult = Stage-Tool `
     -toolName "butteraugli" `
     -exeName "butteraugli.exe" `
-    -searchRoots @(
-        (Join-Path $butterSource "bazel-bin"),
-        $butterSource,
-        (Join-Path $toolsRoot "butteraugli")
-    ) `
+    -searchRoots $butterRoots `
     -destinationDir (Join-Path $runtimeRoot "butteraugli")
 
 Write-Step "Done"
-if (-not ($jpegliOk -and $mozjpegOk -and $butterOk)) {
+if (($null -eq $jpegliResult) -or ($null -eq $mozjpegResult) -or ($null -eq $butterResult)) {
     Write-Warning "One or more runtime tools were not staged. Check warnings above."
     exit 1
 }
 
+$manifestPath = Join-Path $runtimeRoot "build_manifest.json"
+$manifest = [PSCustomObject]@{
+    generatedAtUtc = (Get-Date).ToUniversalTime().ToString("o")
+    configuration = $Configuration
+    skipBuild = [bool]$SkipBuild
+    strictSourceOnly = $strictSourceOnly
+    tools = @($jpegliResult, $mozjpegResult, $butterResult)
+}
+$manifest | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $manifestPath -Encoding UTF8
+
+Write-Host "Runtime manifest: $manifestPath"
 Write-Host "All runtime tools are ready under: $runtimeRoot"
 exit 0

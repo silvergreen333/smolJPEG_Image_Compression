@@ -31,6 +31,9 @@ from .worker import CompressionWorker
 
 
 class MainWindow(QMainWindow):
+    DEFAULT_MAX_SIZE_TEXT = "10 MB"
+    DEFAULT_MODE_INDEX = 0
+
     def __init__(self) -> None:
         super().__init__()
         self.setWindowTitle(APP_NAME)
@@ -55,6 +58,7 @@ class MainWindow(QMainWindow):
         self.mode_combo.setEnabled(enabled)
         self.source_btn.setEnabled(enabled)
         self.dest_btn.setEnabled(enabled)
+        self.reset_btn.setEnabled(enabled)
 
     def _apply_result_row_style(self, row: int, status: str) -> None:
         status_lower = status.strip().lower()
@@ -256,7 +260,7 @@ class MainWindow(QMainWindow):
         self.dest_edit = QLineEdit()
         self.dest_edit.textChanged.connect(self._on_destination_changed)
 
-        self.size_edit = QLineEdit("10 MB")
+        self.size_edit = QLineEdit(self.DEFAULT_MAX_SIZE_TEXT)
         self.size_edit.setObjectName("sizeEdit")
         self.size_edit.setPlaceholderText("10 MB")
         self.size_edit.setToolTip("Enter a file size in MB, for example: 10, 10.0, or 10.000 MB")
@@ -272,7 +276,7 @@ class MainWindow(QMainWindow):
             "Quality (Slow) — Best for archiving and reference",
             "quality",
         )
-        self.mode_combo.setCurrentIndex(0)
+        self.mode_combo.setCurrentIndex(self.DEFAULT_MODE_INDEX)
 
         self.source_btn = QPushButton("Browse…")
         self.source_btn.clicked.connect(self._choose_source_dir)
@@ -311,9 +315,13 @@ class MainWindow(QMainWindow):
         self.open_destination_btn.clicked.connect(self._open_destination_folder)
         self.open_destination_btn.setEnabled(False)
 
+        self.reset_btn = QPushButton("Reset")
+        self.reset_btn.clicked.connect(self._reset_batch_settings)
+
         controls_layout.addWidget(self.start_btn)
         controls_layout.addWidget(self.cancel_btn)
         controls_layout.addWidget(self.open_destination_btn)
+        controls_layout.addWidget(self.reset_btn)
         controls_layout.addStretch(1)
         layout.addLayout(controls_layout)
 
@@ -445,6 +453,14 @@ class MainWindow(QMainWindow):
         selected = QFileDialog.getExistingDirectory(self, "Choose destination folder")
         if selected:
             self.dest_edit.setText(selected)
+
+    def _reset_batch_settings(self) -> None:
+        self.source_edit.clear()
+        self.dest_edit.clear()
+        self.size_edit.setText(self.DEFAULT_MAX_SIZE_TEXT)
+        self.mode_combo.setCurrentIndex(self.DEFAULT_MODE_INDEX)
+        self._normalize_size_text()
+        self._show_toast("Batch settings reset.")
 
     def _normalize_size_text(self) -> None:
         text = self.size_edit.text().strip().upper().replace("MB", "").strip()

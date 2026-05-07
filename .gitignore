@@ -26,6 +26,9 @@ tools/runtime/
 tools/**/build/
 artifacts/
 installer/output/
+tools/jpegli/cjpegli.exe
+tools/mozjpeg/cjpeg.exe
+tools/butteraugli/butteraugli.exe
 
 # OS/editor noise
 .DS_Store

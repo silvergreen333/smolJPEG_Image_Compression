@@ -1,7 +1,8 @@
 param(
     [string]$SpecFile = "pysidedeploy.standalone.spec",
     [switch]$SkipToolBuild,
-    [switch]$SkipDeploy
+    [switch]$SkipDeploy,
+    [switch]$AllowPrebuiltFallback
 )
 
 $ErrorActionPreference = "Stop"
@@ -54,13 +55,53 @@ function Get-LatestDistFolder([string]$root) {
         Select-Object -First 1
 }
 
+function Assert-ValidRuntimeManifest([string]$runtimeDir, [bool]$allowPrebuiltFallback) {
+    $manifestPath = Join-Path $runtimeDir "build_manifest.json"
+    if (-not (Test-Path -LiteralPath $manifestPath)) {
+        throw "Missing runtime manifest at $manifestPath. Run build_tools.ps1 before packaging."
+    }
+
+    $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
+    if ($null -eq $manifest) {
+        throw "Runtime manifest could not be parsed: $manifestPath"
+    }
+
+    if ((-not $allowPrebuiltFallback) -and (-not [bool]$manifest.strictSourceOnly)) {
+        throw "Runtime manifest is not strict-source mode. Rebuild tools without prebuilt fallback."
+    }
+
+    $requiredTools = @("jpegli", "mozjpeg", "butteraugli")
+    foreach ($toolName in $requiredTools) {
+        $toolEntry = $manifest.tools | Where-Object { $_.toolName -eq $toolName } | Select-Object -First 1
+        if ($null -eq $toolEntry) {
+            throw "Runtime manifest missing required tool entry: $toolName"
+        }
+
+        if (-not (Test-Path -LiteralPath $toolEntry.destinationPath)) {
+            throw "Runtime manifest destination missing for ${toolName}: $($toolEntry.destinationPath)"
+        }
+
+        $actualHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $toolEntry.destinationPath).Hash
+        if ($actualHash -ne $toolEntry.sha256) {
+            throw "Runtime hash mismatch for ${toolName}: expected $($toolEntry.sha256), got $actualHash"
+        }
+    }
+
+    Write-Host "Runtime manifest verified: $manifestPath"
+}
+
 if (-not (Test-Path -LiteralPath $specPath)) {
     throw "Spec file not found: $specPath"
 }
 
 if (-not $SkipToolBuild) {
     Write-Step "Building/staging runtime tool executables"
-    & (Join-Path $projectRoot "build_tools.ps1")
+    if ($AllowPrebuiltFallback) {
+        & (Join-Path $projectRoot "build_tools.ps1") -AllowPrebuiltFallback
+    }
+    else {
+        & (Join-Path $projectRoot "build_tools.ps1")
+    }
     if ($LASTEXITCODE -ne 0) {
         throw "build_tools.ps1 failed with exit code $LASTEXITCODE"
     }
@@ -69,6 +110,7 @@ if (-not $SkipToolBuild) {
 if (-not (Test-Path -LiteralPath $runtimeRoot)) {
     throw "Runtime tool folder not found: $runtimeRoot"
 }
+Assert-ValidRuntimeManifest -runtimeDir $runtimeRoot -allowPrebuiltFallback ([bool]$AllowPrebuiltFallback)
 
 if (-not $SkipDeploy) {
     $nuitkaCacheDir = Join-Path $projectRoot "artifacts\nuitka-cache"
