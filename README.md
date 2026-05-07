@@ -7,7 +7,7 @@ You set a max size in MB, and the app finds the best result under that limit whi
   <img src="app.png" alt="smolJPEG app screenshot" width="850">
 </p>
 
-## What This App Is
+## What Is This App
 
 - Windows 11 image compression app.
 - Same resolution, smaller file size.
