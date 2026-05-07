@@ -5,9 +5,10 @@ You set a max size in MB, and the app finds the best result under that limit whi
 
 ## What This App Is
 
-- Local-first desktop app (no cloud upload).
+- Local desktop app (no cloud upload).
 - Built and packaged for Windows 11 distribution.
 - Single installer EXE output for sharing to end users.
+- Example result: `3840x2160 image (30 MB) -> smolJPEG -> 3840x2160 image (8 MB)` (same resolution, smaller file size).
 
 ## Releases and Installation (Windows 11)
 
