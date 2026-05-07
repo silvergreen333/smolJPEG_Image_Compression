@@ -295,9 +295,71 @@ function Stage-Tool(
         return $null
     }
 
+    $dependencyRoots = @()
+    $dependencyRoots += (Split-Path -Parent $selected.FullName)
+    $dependencyRoots += $searchRoots
+
+    $uniqueDependencyRoots = @()
+    $seenDependencyRoots = @{}
+    foreach ($root in $dependencyRoots) {
+        if ([string]::IsNullOrWhiteSpace($root)) {
+            continue
+        }
+        if (-not (Test-Path -LiteralPath $root)) {
+            continue
+        }
+        $fullRoot = (Resolve-Path -LiteralPath $root).Path
+        $key = $fullRoot.ToLowerInvariant()
+        if ($seenDependencyRoots.ContainsKey($key)) {
+            continue
+        }
+        $seenDependencyRoots[$key] = $true
+        $uniqueDependencyRoots += $fullRoot
+    }
+
+    $bestDllByName = @{}
+    foreach ($root in $uniqueDependencyRoots) {
+        $dllCandidates = Get-ChildItem -Path $root -Recurse -File -Filter *.dll -ErrorAction SilentlyContinue
+        foreach ($dll in $dllCandidates) {
+            $nameKey = $dll.Name.ToLowerInvariant()
+            $score = Get-PathScore $dll.FullName
+            $current = $bestDllByName[$nameKey]
+            if (
+                ($null -eq $current) -or
+                ($score -gt $current.Score) -or
+                (($score -eq $current.Score) -and ($dll.LastWriteTimeUtc -gt $current.File.LastWriteTimeUtc))
+            ) {
+                $bestDllByName[$nameKey] = [PSCustomObject]@{
+                    File = $dll
+                    Score = $score
+                }
+            }
+        }
+    }
+
     $dest = Join-Path $destinationDir $exeName
     Copy-Item -LiteralPath $selected.FullName -Destination $dest -Force
     Write-Host "$toolName staged: $($selected.FullName) -> $dest"
+
+    $stagedDlls = @()
+    $copiedDllNames = @()
+    foreach ($entry in $bestDllByName.Values | Sort-Object { $_.File.Name }) {
+        $dll = $entry.File
+        $dllDest = Join-Path $destinationDir $dll.Name
+        Copy-Item -LiteralPath $dll.FullName -Destination $dllDest -Force
+        $copiedDllNames += $dll.Name
+        $stagedDlls += [PSCustomObject]@{
+            name = $dll.Name
+            sourcePath = $dll.FullName
+            destinationPath = $dllDest
+            sourceLastWriteTimeUtc = $dll.LastWriteTimeUtc.ToString("o")
+            sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $dllDest).Hash
+        }
+    }
+    if ($stagedDlls.Count -gt 0) {
+        Write-Host "$toolName staged DLLs: $($copiedDllNames -join ', ')"
+    }
+
     return [PSCustomObject]@{
         toolName = $toolName
         exeName = $exeName
@@ -305,6 +367,7 @@ function Stage-Tool(
         destinationPath = $dest
         sourceLastWriteTimeUtc = $selected.LastWriteTimeUtc.ToString("o")
         sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $dest).Hash
+        auxiliaryFiles = $stagedDlls
     }
 }
 
