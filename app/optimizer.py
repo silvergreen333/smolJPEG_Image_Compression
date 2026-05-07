@@ -170,6 +170,9 @@ class ParallelEtaEstimator:
     def _emit_locked(self, force: bool = False) -> None:
         eta_value = self._estimate_remaining_locked()
         progress_value = self._progress_percent_locked(eta_value)
+        if self._last_progress_value is not None:
+            # Keep per-image progress monotonic to avoid visible backward jumps.
+            progress_value = max(progress_value, self._last_progress_value)
         now = time.monotonic()
 
         should_emit = force
