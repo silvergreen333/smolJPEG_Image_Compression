@@ -8,7 +8,7 @@ You set a max size in MB, and the app finds the best result under that limit whi
 - A Windows 11 image compression app.
 - Same resolution, smaller file size.
 - Runs locally (no cloud upload).
-- Example: `3840x2160 image (30 MB) --> 3840x2160 image (8 MB)`
+- Result: `3840x2160 image (30 MB) --> 3840x2160 image (8 MB)`
 
 ## Releases and Installation (Windows 11)
 
