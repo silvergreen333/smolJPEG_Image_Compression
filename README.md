@@ -9,13 +9,13 @@ You set a max size in MB, and the app finds the best result under that limit whi
 - Built and packaged for Windows 11 distribution.
 - Single installer EXE output for sharing to end users.
 
-## Releases
+## Releases and Installation (Windows 11)
 
 - Latest installer: `smolJPEG_Setup_0.1.9.exe`
 - GitHub Releases page: <https://github.com/silvergreen333/smolJPEG_Image_Compression/releases>
-
 - Download installers only from the official GitHub Releases page above.
 - The installer is currently unsigned, so Windows SmartScreen may show a warning on first run. Use `More info` -> `Run anyway`.
+- Run the installer EXE, follow the setup wizard, then launch `smolJPEG Image Compression` from Start Menu or Desktop shortcut.
 
 ## Performance and Quality Modes
 
@@ -85,13 +85,6 @@ UI controls include `Compress`, `Cancel`, `Open destination folder`, and `Reset`
 - Original pixel dimensions are preserved.
 - Existing names are not overwritten (`image__2.jpg`, etc.).
 - Files already under target size are skipped.
-
-## Installation (Windows 11)
-
-Use the packaged installer EXE to install and run smolJPEG on Windows 11.
-
-Then follow the setup wizard and launch `smolJPEG Image Compression` from Start Menu or Desktop shortcut.
-
 
 ## Notes
 
