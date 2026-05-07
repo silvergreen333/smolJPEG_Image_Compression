@@ -134,6 +134,29 @@ function Ensure-JpegliDependencies([string]$jpegliSourceDir) {
     }
 }
 
+function Resolve-NasmCompiler {
+    $nasm = Get-Command nasm -ErrorAction SilentlyContinue
+    if ($null -ne $nasm -and $nasm.Source) {
+        return $nasm.Source
+    }
+
+    $fallbackCandidates = @(
+        (Join-Path $env:LOCALAPPDATA "Microsoft\WinGet\Links\nasm.exe"),
+        (Join-Path $env:LOCALAPPDATA "Programs\NASM\nasm.exe"),
+        (Join-Path $env:ProgramFiles "NASM\nasm.exe"),
+        (Join-Path ${env:ProgramFiles(x86)} "NASM\nasm.exe"),
+        (Join-Path $env:ChocolateyInstall "bin\nasm.exe")
+    )
+
+    foreach ($candidate in $fallbackCandidates) {
+        if ($candidate -and (Test-Path -LiteralPath $candidate)) {
+            return $candidate
+        }
+    }
+
+    return $null
+}
+
 function Get-PathScore([string]$fullName) {
     $path = $fullName.ToLowerInvariant()
     $score = 0
@@ -380,6 +403,26 @@ $mozjpegBuild = Join-Path $mozjpegSource "build"
 
 Ensure-JpegliDependencies -jpegliSourceDir $jpegliSource
 
+$nasmCompiler = $null
+$mozjpegConfigureArgs = @(
+    "-DCMAKE_POLICY_VERSION_MINIMUM=3.5",
+    "-DPNG_SUPPORTED=OFF",
+    "-DWITH_TURBOJPEG=OFF",
+    "-DWITH_SIMD=ON",
+    "-DREQUIRE_SIMD=ON"
+)
+
+if (-not $SkipBuild) {
+    $nasmCompiler = Resolve-NasmCompiler
+    if ($null -ne $nasmCompiler) {
+        Write-Host "Using NASM for mozjpeg SIMD: $nasmCompiler" -ForegroundColor Green
+        $mozjpegConfigureArgs += "-DCMAKE_ASM_NASM_COMPILER=$nasmCompiler"
+    }
+    else {
+        Write-Warning "NASM compiler not found. mozjpeg source build requires NASM when REQUIRE_SIMD=ON."
+    }
+}
+
 Try-Build-WithCMake `
     -name "jpegli" `
     -sourceDir $jpegliSource `
@@ -394,16 +437,17 @@ Try-Build-WithCMake `
         "-DJPEGLI_ENABLE_TOOLS=ON",
         "-DJPEGLI_ENABLE_SKCMS=ON"
     )
+if ((-not $SkipBuild) -and (Test-Path -LiteralPath $mozjpegBuild)) {
+    Write-Step "Resetting mozjpeg build folder"
+    Remove-Item -LiteralPath $mozjpegBuild -Recurse -Force
+}
+
 Try-Build-WithCMake `
     -name "mozjpeg" `
     -sourceDir $mozjpegSource `
     -buildDir $mozjpegBuild `
     -target "cjpeg" `
-    -extraConfigureArgs @(
-        "-DCMAKE_POLICY_VERSION_MINIMUM=3.5",
-        "-DPNG_SUPPORTED=OFF",
-        "-DWITH_TURBOJPEG=OFF"
-    )
+    -extraConfigureArgs $mozjpegConfigureArgs
 Try-Build-Butteraugli -sourceDir $butterSource
 
 Write-Step "Staging runtime tools"

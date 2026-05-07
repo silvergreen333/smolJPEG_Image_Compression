@@ -101,7 +101,6 @@ def run_external(
     startupinfo = None
 
     if sys.platform == "win32":
-        creationflags |= getattr(subprocess, "BELOW_NORMAL_PRIORITY_CLASS", 0)
         creationflags |= getattr(subprocess, "CREATE_NO_WINDOW", 0)
 
         startupinfo = subprocess.STARTUPINFO()
