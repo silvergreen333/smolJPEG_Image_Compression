@@ -7,14 +7,12 @@ cc_library(
     hdrs = [
         "butteraugli/butteraugli.h",
     ],
-    copts = ["-Wno-sign-compare"],
     visibility = ["//visibility:public"],
 )
 
 cc_binary(
     name = "butteraugli",
     srcs = ["butteraugli/butteraugli_main.cc"],
-    copts = ["-Wno-sign-compare"],
     visibility = ["//visibility:public"],
     deps = [
         ":butteraugli_lib",

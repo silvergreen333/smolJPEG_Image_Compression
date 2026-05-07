@@ -9,6 +9,11 @@ You set a max size in MB, and the app finds the best result under that limit whi
 - Built and packaged for Windows 11 distribution.
 - Single installer EXE output for sharing to end users.
 
+## Releases
+
+- Latest installer: `smolJPEG_Setup_0.1.1.exe`
+- GitHub Releases page: <https://github.com/silvergreen333/smolJPEG_Image_Compression/releases>
+
 ## Speed and Quality Modes
 
 smolJPEG gives you two operating modes so you can choose speed or maximum visual quality.

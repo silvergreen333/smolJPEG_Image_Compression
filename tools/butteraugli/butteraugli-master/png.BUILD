@@ -3,6 +3,14 @@
 
 licenses(["notice"])  # BSD/MIT-like license
 
+genrule(
+    name = "pnglibconf",
+    srcs = ["scripts/pnglibconf.h.prebuilt"],
+    outs = ["pnglibconf.h"],
+    cmd_bat = "copy /Y $(location scripts/pnglibconf.h.prebuilt) $@ >NUL",
+    cmd = "cp $(location scripts/pnglibconf.h.prebuilt) $@",
+)
+
 cc_library(
     name = "png",
     srcs = [
@@ -25,6 +33,7 @@ cc_library(
     hdrs = [
         "png.h",
         "pngconf.h",
+        ":pnglibconf",
     ],
     includes = ["."],
     linkopts = ["-lm"],

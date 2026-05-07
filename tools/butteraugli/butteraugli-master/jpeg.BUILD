@@ -67,6 +67,10 @@ cc_library(
         "jpegint.h",
         "jpeglib.h",
     ],
+    copts = select({
+        "@bazel_tools//src/conditions:windows": ["/D__inline__=__inline"],
+        "//conditions:default": [],
+    }),
     includes = ["."],
     visibility = ["//visibility:public"],
 )
