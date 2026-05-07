@@ -1,7 +1,8 @@
 [app]
 title = smolJPEG Image Compression
 project_dir = .
-project_file = main.py
+input_file = main.py
+project_file = 
 exec_directory = .
 icon = smolJPEG_icon.ico
 python_path = .venv\Scripts\python.exe
@@ -29,9 +30,9 @@ force = True
 [nuitka]
 mode = onefile
 
-# include the app icon plus all external helper tools inside the onefile bundle.
-# --include-data-files is the documented option for specific files in onefile mode.
-extra_args = --quiet --noinclude-qt-translations --windows-console-mode=disable --include-data-files=smolJPEG_icon.ico=smolJPEG_icon.ico --include-data-files=tools/jpegli/cjpegli.exe=tools/jpegli/cjpegli.exe --include-data-files=tools/mozjpeg/cjpeg.exe=tools/mozjpeg/cjpeg.exe --include-data-files=tools/butteraugli/butteraugli.exe=tools/butteraugli/butteraugli.exe
+# Onefile profile (experimental with subprocess helper EXEs).
+# For production stability, prefer `pysidedeploy.standalone.spec` + installer workflow.
+extra_args = --quiet --noinclude-qt-translations --windows-console-mode=disable --assume-yes-for-downloads --include-data-files=smolJPEG_icon.ico=smolJPEG_icon.ico --include-data-files=tools/runtime/jpegli/cjpegli.exe=tools/runtime/jpegli/cjpegli.exe --include-data-files=tools/runtime/mozjpeg/cjpeg.exe=tools/runtime/mozjpeg/cjpeg.exe --include-data-files=tools/runtime/butteraugli/butteraugli.exe=tools/runtime/butteraugli/butteraugli.exe
 
 [buildozer]
 mode = release

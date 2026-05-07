@@ -66,6 +66,9 @@ class CompressionWorker(QThread):
     def run(self) -> None:
         try:
             tools = discover_tool_paths()
+            self.log.emit(f"Jpegli tool: {tools.jpegli}")
+            self.log.emit(f"MozJPEG tool: {tools.mozjpeg}")
+            self.log.emit(f"Butteraugli tool: {tools.butteraugli}")
             if self.mode == "quality":
                 optimizer = JpegOptimizer(tools, cancel_event=self._cancel_event)
             else:

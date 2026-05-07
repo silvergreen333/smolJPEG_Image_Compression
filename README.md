@@ -113,3 +113,56 @@ tools/
     cjpeg.exe
   butteraugli/
     butteraugli.exe
+
+## Windows Build and Packaging Workflow
+
+The recommended Windows release flow is:
+
+1. Build/stage runtime tool executables
+2. Build a standalone app folder with `pyside6-deploy`
+3. Create a single installer `.exe` (Inno Setup) that installs the app
+
+### 1) Build and stage tool executables
+
+```powershell
+.\build_tools.ps1
+```
+
+This stages tool binaries into:
+
+```text
+tools/runtime/jpegli/cjpegli.exe
+tools/runtime/mozjpeg/cjpeg.exe
+tools/runtime/butteraugli/butteraugli.exe
+```
+
+### 2) Build standalone app folder
+
+```powershell
+.\package_standalone.ps1
+```
+
+This runs `pyside6-deploy` with `pysidedeploy.standalone.spec`, then copies `tools/runtime` into the packaged app directory.
+
+Prerequisites for this step:
+
+* Visual Studio C++ Build Tools (required by Nuitka on Windows)
+* `dumpbin` in `PATH` (ships with MSVC build tools)
+
+### 3) Build single installer EXE
+
+Install [Inno Setup](https://jrsoftware.org/isinfo.php), then run:
+
+```powershell
+.\make_installer.ps1 -Version 0.1.0
+```
+
+Output:
+
+```text
+installer/output/smolJPEG_Setup_<version>.exe
+```
+
+### Why this flow
+
+Subprocess helper tools (`cjpegli.exe`, `cjpeg.exe`, `butteraugli.exe`) are most stable when shipped as files in the installed app directory. The installer is still a single distributable `.exe` for end users.

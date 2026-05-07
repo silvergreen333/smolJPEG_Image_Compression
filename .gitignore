@@ -17,9 +17,15 @@ env/
 build/
 dist/
 deployment/
+*.dist/
 *.spec.bak
 smolJPEG Image Compression.exe
 *.exe.bak
+nuitka-crash-report.xml
+tools/runtime/
+tools/**/build/
+artifacts/
+installer/output/
 
 # OS/editor noise
 .DS_Store
