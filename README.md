@@ -87,16 +87,9 @@ UI controls include `Compress`, `Cancel`, `Open destination folder`, and `Reset`
 
 Use the packaged installer EXE to install and run smolJPEG on Windows 11.
 
-When a release is shared, run:
-
-```text
-smolJPEG_Setup_<version>.exe
-```
-
 Then follow the setup wizard and launch `smolJPEG Image Compression` from Start Menu or Desktop shortcut.
 
 ## Notes
 
 - This repository contains source code and packaging scripts.
 - End users should use the packaged installer EXE.
-- Legacy root-level tool EXEs under `tools/jpegli`, `tools/mozjpeg`, and `tools/butteraugli` were removed.
