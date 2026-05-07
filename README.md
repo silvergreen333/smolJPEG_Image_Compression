@@ -37,7 +37,7 @@ It is built this way so you do not have to manually guess JPEG settings for diff
 Why this process:
 - Fast path for big batches and repeated exports.
 - Good visual results without long wait times.
-- Predictable throughput when delivery speed matters.
+- Predictable throughput when speed matters.
 
 Best for:
 - Social media exports
