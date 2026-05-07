@@ -14,7 +14,7 @@ You set a max size in MB, and the app finds the best result under that limit whi
 - Runs locally (no cloud upload).
 - Result: `3840x2160 image (30 MB) --> 3840x2160 image (8 MB)`
 
-## Releases and Installation (Windows 11)
+## Releases and Installation
 
 - Latest installer: `smolJPEG_Setup_0.1.9.exe`
 - GitHub Releases page: <https://github.com/silvergreen333/smolJPEG_Image_Compression/releases>
@@ -65,7 +65,7 @@ In short:
 - `Performance` = fastest path to "under size limit"
 - `Quality` = most visual optimization before final save
 
-## Core Workflow (In App)
+## Core App Workflow
 
 1. Choose source folder.
 2. Choose destination folder.
