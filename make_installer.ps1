@@ -1,6 +1,6 @@
 param(
     [string]$AppDir = "",
-    [string]$Version = "0.1.0",
+    [string]$Version = "0.1.1",
     [string]$OutputDir = "installer\output",
     [string]$IsccPath = ""
 )

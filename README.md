@@ -51,55 +51,20 @@ UI controls include `Compress`, `Cancel`, `Open destination folder`, and `Reset`
 - Existing names are not overwritten (`image__2.jpg`, etc.).
 - Files already under target size are skipped.
 
-## Windows 11 Build and Release
+## Installation (Windows 11)
 
-The release pipeline is designed for Windows 11 and produces an installer EXE.
+Use the packaged installer EXE to install and run smolJPEG on Windows 11.
 
-### Prerequisites
-
-- Python virtual environment with project dependencies.
-- Visual Studio 2022 Build Tools (C++ workload, includes `dumpbin`).
-- Inno Setup 6 (`ISCC.exe`).
-
-### Recommended Release Flow
-
-From project root:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\release_windows.ps1 -Version 0.1.0
-```
-
-This does:
-
-1. Build/stage runtime tool executables.
-2. Build standalone app folder via `pyside6-deploy`.
-3. Build installer EXE with Inno Setup.
-
-Installer output:
+When a release is shared, run:
 
 ```text
-installer/output/smolJPEG_Setup_<version>.exe
+smolJPEG_Setup_<version>.exe
 ```
 
-## Strict Source-Built Tooling (Current Behavior)
+Then follow the setup wizard and launch `smolJPEG Image Compression` from Start Menu or Desktop shortcut.
 
-`build_tools.ps1` now runs in strict mode by default:
+## Notes
 
-- Accepts tool binaries from source build outputs only (`build` / `bazel-bin`).
-- Does not silently reuse legacy prebuilt EXEs from `tools/<tool>/`.
-- Writes `tools/runtime/build_manifest.json` with staged file hashes.
-
-`package_standalone.ps1` verifies that runtime manifest before packaging.
-
-Optional fallback mode (not recommended):
-
-```powershell
-.\build_tools.ps1 -AllowPrebuiltFallback
-.\package_standalone.ps1 -AllowPrebuiltFallback
-```
-
-## Repository Notes
-
-- Runtime packaged tools are staged under `tools/runtime/` during build.
-- Legacy root-level tool EXEs under `tools/jpegli`, `tools/mozjpeg`, and `tools/butteraugli` were removed to avoid accidental reuse.
-
+- This repository contains source code and packaging scripts.
+- End users should use the packaged installer EXE.
+- Legacy root-level tool EXEs under `tools/jpegli`, `tools/mozjpeg`, and `tools/butteraugli` were removed.
