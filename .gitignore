@@ -29,6 +29,16 @@ installer/output/
 tools/jpegli/cjpegli.exe
 tools/mozjpeg/cjpeg.exe
 tools/butteraugli/butteraugli.exe
+tools/butteraugli/butteraugli-master/MODULE.bazel
+tools/butteraugli/butteraugli-master/MODULE.bazel.lock
+tools/butteraugli/butteraugli-master/bazel-*/
+tools/jpegli/jpegli-main/downloads/
+tools/jpegli/jpegli-main/third_party/highway/
+tools/jpegli/jpegli-main/third_party/libjpeg-turbo/
+tools/jpegli/jpegli-main/third_party/libpng/
+tools/jpegli/jpegli-main/third_party/sjpeg/
+tools/jpegli/jpegli-main/third_party/skcms/
+tools/jpegli/jpegli-main/third_party/zlib/
 
 # OS/editor noise
 .DS_Store
