@@ -11,24 +11,51 @@ You set a max size in MB, and the app finds the best result under that limit whi
 
 ## Releases
 
-- Latest installer: `smolJPEG_Setup_0.1.4.exe`
+- Latest installer: `smolJPEG_Setup_0.1.7.exe`
 - GitHub Releases page: <https://github.com/silvergreen333/smolJPEG_Image_Compression/releases>
 
-## Speed and Quality Modes
+## Performance and Quality Modes
 
-smolJPEG gives you two operating modes so you can choose speed or maximum visual quality.
+smolJPEG gives you two modes with different priorities: fast batch turnaround or best visual quality under your size limit.
+It is built this way so you do not have to manually guess JPEG settings for different image types.
 
 ### Performance (Fast)
 
-- Uses Pillow for quick JPEG quality search.
-- Optimized for fast throughput on large batches.
-- Best for social/web workflows where speed matters most.
+- Uses Pillow (a library for image processing in Python) for a direct JPEG quality search.
+- Checks quality levels quickly and keeps the first result that fits your max MB target.
+- Preserves original resolution and skips files that are already under the limit.
+- Minimizes heavy analysis so large folders finish faster.
+
+Why this process:
+- Fast path for big batches and repeated exports.
+- Good visual results without long wait times.
+- Predictable throughput when delivery speed matters.
+
+Best for:
+- Social media exports
+- Web uploads
+- Everyday bulk compression where speed matters most
 
 ### Quality (Slow)
 
-- Uses `jpegli`, `mozjpeg`, and `butteraugli` tooling.
-- Tries more candidate encodes and compares perceptual quality.
-- Best for archive/reference outputs under strict size limits.
+- Builds a high-quality working copy of each image, then tests many candidates with `jpegli` (a modern encoder tuned for strong visual quality per byte) and `mozjpeg` (a widely used encoder tuned for high compression efficiency).
+- Tries multiple chroma subsampling options plus both baseline and progressive MozJPEG variants.
+- Uses `butteraugli` (a perceptual metric that estimates what differences people can actually notice) to score candidates, then keeps the best-looking result that still meets your max MB target.
+- Preserves original resolution and automatically writes the winning candidate to output.
+
+Why this process:
+- Prioritizes detail retention during compression.
+- Reduces manual trial-and-error by automatically comparing many options.
+- Delivers more consistent "best possible under size cap" results across mixed image sets.
+
+Best for:
+- Archive/reference images
+- Screenshots or artwork where fine detail matters
+- Tight size limits where you still want the best possible look
+
+In short:
+- `Performance` = fastest path to "under size limit"
+- `Quality` = most visual optimization before final save
 
 ## Core Workflow (In App)
 
