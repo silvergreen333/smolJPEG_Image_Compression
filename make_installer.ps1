@@ -1,8 +1,17 @@
 param(
     [string]$AppDir = "",
-    [string]$Version = "0.1.7",
+    [string]$Version = "0.1.8",
     [string]$OutputDir = "installer\output",
-    [string]$IsccPath = ""
+    [string]$IsccPath = "",
+    [string]$Publisher = "Silvergreen333",
+    [switch]$EnableSigning,
+    [string]$SignToolPath = "",
+    [string]$CertFile = "",
+    [string]$CertPassword = "",
+    [string]$CertThumbprint = "",
+    [string]$TimestampUrl = "http://timestamp.digicert.com",
+    [string]$FileDigest = "sha256",
+    [string]$TimestampDigest = "sha256"
 )
 
 $ErrorActionPreference = "Stop"
@@ -13,6 +22,46 @@ $appExeName = "smolJPEG Image Compression.exe"
 
 function Write-Step([string]$message) {
     Write-Host "`n==> $message" -ForegroundColor Cyan
+}
+
+function Resolve-SignToolExe([string]$requestedPath) {
+    if (-not [string]::IsNullOrWhiteSpace($requestedPath)) {
+        if (-not (Test-Path -LiteralPath $requestedPath)) {
+            throw "Specified SignTool path does not exist: $requestedPath"
+        }
+        return (Resolve-Path -LiteralPath $requestedPath).Path
+    }
+
+    $cmd = Get-Command signtool.exe -ErrorAction SilentlyContinue
+    if ($null -eq $cmd) {
+        $cmd = Get-Command signtool -ErrorAction SilentlyContinue
+    }
+    if ($null -ne $cmd) {
+        return $cmd.Source
+    }
+
+    $kitRoots = @(
+        "C:\Program Files (x86)\Windows Kits\10\bin",
+        "C:\Program Files\Windows Kits\10\bin"
+    )
+    foreach ($kitRoot in $kitRoots) {
+        if (-not (Test-Path -LiteralPath $kitRoot)) {
+            continue
+        }
+
+        $versionDirs = Get-ChildItem -Path $kitRoot -Directory -ErrorAction SilentlyContinue |
+            Sort-Object Name -Descending
+        foreach ($versionDir in $versionDirs) {
+            foreach ($arch in @("x64", "x86")) {
+                $candidate = Join-Path $versionDir.FullName "$arch\signtool.exe"
+                if (Test-Path -LiteralPath $candidate) {
+                    return $candidate
+                }
+            }
+        }
+    }
+
+    return $null
 }
 
 function Get-LatestDistFolder([string]$root) {
@@ -76,14 +125,69 @@ if ($null -eq $isccExe) {
     throw "Inno Setup compiler (iscc.exe) not found in PATH."
 }
 
+$shouldSign = [bool]$EnableSigning -or
+    (-not [string]::IsNullOrWhiteSpace($CertFile)) -or
+    (-not [string]::IsNullOrWhiteSpace($CertThumbprint))
+
+$isccArgs = @(
+    "/DSourceDir=$resolvedAppDir",
+    "/DOutputDir=$resolvedOutputDir",
+    "/DMyAppVersion=$Version",
+    "/DMyAppPublisher=$Publisher"
+)
+
+if ($shouldSign) {
+    if ([string]::IsNullOrWhiteSpace($CertFile) -and [string]::IsNullOrWhiteSpace($CertThumbprint)) {
+        throw "Signing enabled but no certificate provided. Use -CertFile or -CertThumbprint."
+    }
+    if ((-not [string]::IsNullOrWhiteSpace($CertFile)) -and (-not [string]::IsNullOrWhiteSpace($CertThumbprint))) {
+        throw "Specify either -CertFile or -CertThumbprint, not both."
+    }
+
+    $signtoolExe = Resolve-SignToolExe -requestedPath $SignToolPath
+    if ([string]::IsNullOrWhiteSpace($signtoolExe)) {
+        throw "signtool.exe not found. Install Windows SDK / MSVC Build Tools, or pass -SignToolPath."
+    }
+
+    $signParts = @(
+        "`$q$signtoolExe`$q",
+        "sign",
+        "/fd $FileDigest"
+    )
+    if (-not [string]::IsNullOrWhiteSpace($TimestampUrl)) {
+        $signParts += "/tr `$q$TimestampUrl`$q"
+        $signParts += "/td $TimestampDigest"
+    }
+    if (-not [string]::IsNullOrWhiteSpace($CertFile)) {
+        $resolvedCertPath = (Resolve-Path -LiteralPath $CertFile).Path
+        $signParts += "/f `$q$resolvedCertPath`$q"
+        if (-not [string]::IsNullOrWhiteSpace($CertPassword)) {
+            $signParts += "/p `$q$CertPassword`$q"
+        }
+    }
+    else {
+        $signParts += "/sha1 $CertThumbprint"
+    }
+    $signParts += "/d `$q$Publisher`$q"
+    $signParts += "/du `$qhttps://github.com/silvergreen333/smolJPEG_Image_Compression`$q"
+    $signParts += "`$f"
+
+    $signCommand = $signParts -join " "
+    $isccArgs += "/DEnableSigning=1"
+    $isccArgs += "/Ssigntool=$signCommand"
+
+    Write-Host "Code signing enabled using: $signtoolExe" -ForegroundColor Yellow
+}
+else {
+    Write-Host "Code signing disabled (unsigned installer)." -ForegroundColor Yellow
+}
+
+$isccArgs += $issPath
+
 Write-Step "Building installer"
 Push-Location (Join-Path $projectRoot "installer")
 try {
-    & $isccExe `
-        "/DSourceDir=$resolvedAppDir" `
-        "/DOutputDir=$resolvedOutputDir" `
-        "/DMyAppVersion=$Version" `
-        $issPath
+    & $isccExe @isccArgs
 
     if ($LASTEXITCODE -ne 0) {
         throw "ISCC failed with exit code $LASTEXITCODE"

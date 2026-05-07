@@ -1,6 +1,13 @@
 param(
-    [string]$Version = "0.1.7",
-    [switch]$SkipToolBuild
+    [string]$Version = "0.1.8",
+    [switch]$SkipToolBuild,
+    [string]$Publisher = "Silvergreen333",
+    [switch]$EnableSigning,
+    [string]$SignToolPath = "",
+    [string]$CertFile = "",
+    [string]$CertPassword = "",
+    [string]$CertThumbprint = "",
+    [string]$TimestampUrl = "http://timestamp.digicert.com"
 )
 
 $ErrorActionPreference = "Stop"
@@ -18,7 +25,15 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 Write-Host "`n==> Building installer EXE" -ForegroundColor Cyan
-& (Join-Path $projectRoot "make_installer.ps1") -Version $Version
+& (Join-Path $projectRoot "make_installer.ps1") `
+    -Version $Version `
+    -Publisher $Publisher `
+    -EnableSigning:$EnableSigning `
+    -SignToolPath $SignToolPath `
+    -CertFile $CertFile `
+    -CertPassword $CertPassword `
+    -CertThumbprint $CertThumbprint `
+    -TimestampUrl $TimestampUrl
 if ($LASTEXITCODE -ne 0) {
     throw "make_installer.ps1 failed with exit code $LASTEXITCODE"
 }

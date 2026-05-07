@@ -11,7 +11,7 @@ You set a max size in MB, and the app finds the best result under that limit whi
 
 ## Releases
 
-- Latest installer: `smolJPEG_Setup_0.1.7.exe`
+- Latest installer: `smolJPEG_Setup_0.1.8.exe`
 - GitHub Releases page: <https://github.com/silvergreen333/smolJPEG_Image_Compression/releases>
 
 ## Performance and Quality Modes
@@ -88,6 +88,29 @@ UI controls include `Compress`, `Cancel`, `Open destination folder`, and `Reset`
 Use the packaged installer EXE to install and run smolJPEG on Windows 11.
 
 Then follow the setup wizard and launch `smolJPEG Image Compression` from Start Menu or Desktop shortcut.
+
+## Code Signing (Recommended)
+
+To reduce `Unknown publisher` / SmartScreen warnings, sign the installer with a trusted code-signing certificate.
+
+Example (certificate file):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\release_windows.ps1 `
+  -Version 0.1.8 `
+  -EnableSigning `
+  -CertFile "C:\path\to\codesign.pfx" `
+  -CertPassword "<pfx-password>"
+```
+
+Example (certificate in Windows cert store):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\release_windows.ps1 `
+  -Version 0.1.8 `
+  -EnableSigning `
+  -CertThumbprint "<sha1-thumbprint>"
+```
 
 ## Notes
 
