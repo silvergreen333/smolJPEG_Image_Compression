@@ -2,7 +2,7 @@
 #define MyAppExeName "smolJPEG Image Compression.exe"
 
 #ifndef MyAppVersion
-  #define MyAppVersion "0.1.1"
+  #define MyAppVersion "0.1.2"
 #endif
 
 #ifndef SourceDir
