@@ -11,7 +11,7 @@ You set a max size in MB, and the app finds the best result under that limit whi
 
 ## Releases
 
-- Latest installer: `smolJPEG_Setup_0.1.2.exe`
+- Latest installer: `smolJPEG_Setup_0.1.3.exe`
 - GitHub Releases page: <https://github.com/silvergreen333/smolJPEG_Image_Compression/releases>
 
 ## Speed and Quality Modes

@@ -140,6 +140,18 @@ if ($null -eq $distFolder) {
     throw "Could not find any .dist output folder under $projectRoot"
 }
 
+$mainExePath = Join-Path $distFolder.FullName "main.exe"
+$desiredExePath = Join-Path $distFolder.FullName $appExeName
+
+if (Test-Path -LiteralPath $mainExePath) {
+    # pyside6-deploy outputs main.exe for the current build; prefer it over any
+    # pre-existing named launcher to avoid stale binaries.
+    if (Test-Path -LiteralPath $desiredExePath) {
+        Remove-Item -LiteralPath $desiredExePath -Force
+    }
+    Rename-Item -LiteralPath $mainExePath -NewName $appExeName
+}
+
 $rootExeCandidates = Get-ChildItem -Path $distFolder.FullName -File -Filter "*.exe"
 if (-not $rootExeCandidates) {
     throw "No .exe files found in packaged folder: $($distFolder.FullName)"
@@ -147,21 +159,17 @@ if (-not $rootExeCandidates) {
 
 $exeCandidate = $rootExeCandidates | Where-Object { $_.Name -ieq $appExeName } | Select-Object -First 1
 if ($null -eq $exeCandidate) {
-    $exeCandidate = $rootExeCandidates | Where-Object { $_.Name -ieq "main.exe" } | Select-Object -First 1
-}
-if ($null -eq $exeCandidate) {
     $exeCandidate = $rootExeCandidates |
         Sort-Object @{ Expression = { $_.Length }; Descending = $true }, @{ Expression = { $_.LastWriteTimeUtc }; Descending = $true } |
         Select-Object -First 1
-}
 
-$desiredExePath = Join-Path $distFolder.FullName $appExeName
-if ($exeCandidate.Name -ine $appExeName) {
-    if (Test-Path -LiteralPath $desiredExePath) {
-        Remove-Item -LiteralPath $desiredExePath -Force
+    if ($exeCandidate.Name -ine $appExeName) {
+        if (Test-Path -LiteralPath $desiredExePath) {
+            Remove-Item -LiteralPath $desiredExePath -Force
+        }
+        Rename-Item -LiteralPath $exeCandidate.FullName -NewName $appExeName
+        $exeCandidate = Get-Item -LiteralPath $desiredExePath
     }
-    Rename-Item -LiteralPath $exeCandidate.FullName -NewName $appExeName
-    $exeCandidate = Get-Item -LiteralPath $desiredExePath
 }
 
 $appDir = $distFolder.FullName
