@@ -12,7 +12,7 @@ packages = PySide6,PIL
 
 # local python source folders to include
 packages_dir = app
-python_path = .\.venv\Scripts\python.exe
+python_path = .venv\Scripts\python.exe
 
 [qt]
 qml_files = 

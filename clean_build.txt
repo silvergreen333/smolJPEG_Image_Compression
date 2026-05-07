@@ -1,3 +1,2 @@
-cd "."
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned
 .\clean_build.ps1

@@ -10,7 +10,7 @@ python_path = .venv\Scripts\python.exe
 [python]
 packages = PySide6,PIL
 packages_dir = app
-python_path = .\.venv\Scripts\python.exe
+python_path = .venv\Scripts\python.exe
 
 [qt]
 qml_files = 
