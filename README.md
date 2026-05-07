@@ -13,19 +13,9 @@ You set a max size in MB, and the app finds the best result under that limit whi
 
 - Latest installer: `smolJPEG_Setup_0.1.8.exe`
 - GitHub Releases page: <https://github.com/silvergreen333/smolJPEG_Image_Compression/releases>
-- SHA-256 (`smolJPEG_Setup_0.1.8.exe`): `1E258AC25FBB4B4A77B67042429DD2B965501EC0CC5EB91388E204E283D30F7A`
-
-## Security / Verify Download
 
 - Download installers only from the official GitHub Releases page above.
-- Verify the file hash before running:
-
-```powershell
-Get-FileHash -Algorithm SHA256 .\smolJPEG_Setup_0.1.8.exe
-```
-
-- Match the output hash exactly to the value listed in this README or in release notes.
-- The installer is currently unsigned, so Windows SmartScreen may show a warning on first run. If hash verification matches, use `More info` -> `Run anyway`.
+- The installer is currently unsigned, so Windows SmartScreen may show a warning on first run. Use `More info` -> `Run anyway`.
 
 ## Performance and Quality Modes
 
@@ -102,28 +92,6 @@ Use the packaged installer EXE to install and run smolJPEG on Windows 11.
 
 Then follow the setup wizard and launch `smolJPEG Image Compression` from Start Menu or Desktop shortcut.
 
-## Optional: Code Signing
-
-If you later decide to distribute signed installers, you can sign the EXE with a trusted code-signing certificate.
-
-Example (certificate file):
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\release_windows.ps1 `
-  -Version 0.1.8 `
-  -EnableSigning `
-  -CertFile "C:\path\to\codesign.pfx" `
-  -CertPassword "<pfx-password>"
-```
-
-Example (certificate in Windows cert store):
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\release_windows.ps1 `
-  -Version 0.1.8 `
-  -EnableSigning `
-  -CertThumbprint "<sha1-thumbprint>"
-```
 
 ## Notes
 
