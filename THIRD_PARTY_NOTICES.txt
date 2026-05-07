@@ -1,0 +1,51 @@
+smolJPEG Image Compression - Third-Party Notices
+================================================
+
+This project is licensed under the MIT License (see LICENSE).
+
+smolJPEG includes and/or invokes third-party components with their own
+licenses. The license texts are provided in the "third_party_licenses"
+folder included with source and packaged builds.
+
+Required attribution (IJG / libjpeg-turbo):
+This software is based in part on the work of the Independent JPEG Group.
+
+Included third-party components
+------------------------------
+
+1) butteraugli
+   - Upstream: https://github.com/google/butteraugli
+   - License: Apache License 2.0
+   - Text: third_party_licenses\butteraugli-LICENSE-Apache-2.0.txt
+
+2) mozjpeg / libjpeg-turbo components
+   - Upstream: https://github.com/mozilla/mozjpeg
+   - Licenses: IJG License + BSD-3-Clause style (and related notices as
+     described by libjpeg-turbo)
+   - Texts:
+       third_party_licenses\mozjpeg-LICENSE.md
+       third_party_licenses\mozjpeg-README.ijg.txt
+
+3) jpegli
+   - Upstream: https://github.com/libjxl/libjxl/tree/main/lib/jpegli
+   - License: BSD-3-Clause style
+   - Text: third_party_licenses\jpegli-LICENSE-BSD-3-Clause.txt
+
+4) Pillow (Python Imaging Library fork)
+   - Upstream: https://github.com/python-pillow/Pillow
+   - License: PIL Software License / MIT-CMU style, with bundled third-party
+     notices in Pillow's distributed license file
+   - Text: third_party_licenses\pillow-LICENSE.txt
+
+5) PySide6 / Shiboken6 (Qt for Python runtime used by this app build)
+   - Upstream: https://pyside.org
+   - Declared license expression in package metadata:
+     LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
+   - Metadata snapshots:
+       third_party_licenses\pyside6-METADATA.txt
+       third_party_licenses\shiboken6-METADATA.txt
+
+Note:
+License compliance requirements can vary by distribution model and
+jurisdiction. This notice file is provided to ship attribution and license
+texts together with the app artifacts.

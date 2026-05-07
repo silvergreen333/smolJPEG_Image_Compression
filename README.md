@@ -97,3 +97,5 @@ Then follow the setup wizard and launch `smolJPEG Image Compression` from Start 
 
 - This repository contains source code and packaging scripts.
 - End users should use the packaged installer EXE.
+- Installer/app bundles include `THIRD_PARTY_NOTICES.txt` and the
+  `third_party_licenses` folder for open-source attribution.

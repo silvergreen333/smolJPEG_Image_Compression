@@ -181,5 +181,21 @@ $destToolsRuntime = Join-Path $appDir "tools\runtime"
 New-Item -ItemType Directory -Path $destToolsRuntime -Force | Out-Null
 Copy-Item -Path (Join-Path $runtimeRoot "*") -Destination $destToolsRuntime -Recurse -Force
 
+Write-Step "Copying license and notice files into packaged app"
+$topLevelNoticeFiles = @("LICENSE", "THIRD_PARTY_NOTICES.txt")
+foreach ($fileName in $topLevelNoticeFiles) {
+    $sourcePath = Join-Path $projectRoot $fileName
+    if (Test-Path -LiteralPath $sourcePath) {
+        Copy-Item -LiteralPath $sourcePath -Destination (Join-Path $appDir $fileName) -Force
+    }
+}
+
+$sourceThirdPartyDir = Join-Path $projectRoot "third_party_licenses"
+if (Test-Path -LiteralPath $sourceThirdPartyDir) {
+    $destThirdPartyDir = Join-Path $appDir "third_party_licenses"
+    New-Item -ItemType Directory -Path $destThirdPartyDir -Force | Out-Null
+    Copy-Item -Path (Join-Path $sourceThirdPartyDir "*") -Destination $destThirdPartyDir -Recurse -Force
+}
+
 Write-Step "Done"
 Write-Host "Standalone app ready at: $appDir"

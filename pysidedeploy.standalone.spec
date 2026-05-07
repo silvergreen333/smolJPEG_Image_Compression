@@ -27,7 +27,7 @@ force = True
 
 [nuitka]
 mode = standalone
-extra_args = --quiet --noinclude-qt-translations --windows-console-mode=disable --assume-yes-for-downloads --include-data-files=smolJPEG_icon.ico=smolJPEG_icon.ico
+extra_args = --quiet --noinclude-qt-translations --windows-console-mode=disable --assume-yes-for-downloads --include-data-files=smolJPEG_icon.ico=smolJPEG_icon.ico --include-data-files=LICENSE=LICENSE --include-data-files=THIRD_PARTY_NOTICES.txt=THIRD_PARTY_NOTICES.txt --include-data-dir=third_party_licenses=third_party_licenses
 
 [buildozer]
 mode = release
